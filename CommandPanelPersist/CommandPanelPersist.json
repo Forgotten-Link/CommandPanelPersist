@@ -1,0 +1,16 @@
+{
+  "Author": "kerhs",
+  "Name": "CommandPanelPersist",
+  "Punchline": "Stops the Command Panel from closing on death, wipes, and zone changes.",
+  "Description": "Keeps the in-game Command Panel open through deaths, instance resets, and area transitions. Toggle with /cmdpanelpersist [on|off].",
+  "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/Forgotten-Link/CommandPanelPersist",
+  "IconUrl": "https://raw.githubusercontent.com/Forgotten-Link/CommandPanelPersist/master/images/icon.png",
+  "AcceptsFeedback": true,
+  "Tags": [
+    "ui",
+    "command panel",
+    "quick panel",
+    "qol"
+  ]
+}

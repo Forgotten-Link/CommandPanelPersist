@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 1.0.0.0)'
+        required: true
+
+jobs:
+  release:
+    runs-on: windows-2022
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout master
+      uses: actions/checkout@v5
+      with:
+        ref: master
+        fetch-depth: 0
+
+    - name: Determine version
+      id: ver
+      shell: pwsh
+      run: |
+        if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+          $version = '${{ github.event.inputs.version }}'
+          $tag = "v$version"
+        } else {
+          $tag = '${{ github.ref_name }}'
+          $version = $tag -replace '^v',''
+        }
+        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        "tag=$tag"         | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Download Dalamud
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
+        Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
+
+    - name: Build
+      run: dotnet build CommandPanelPersist/CommandPanelPersist.csproj --configuration Release /p:Version=${{ steps.ver.outputs.version }} /p:AssemblyVersion=${{ steps.ver.outputs.version }} /p:FileVersion=${{ steps.ver.outputs.version }}
+
+    - name: Locate plugin zip
+      shell: pwsh
+      run: |
+        $candidates = @(
+          'CommandPanelPersist\bin\x64\Release\CommandPanelPersist\latest.zip',
+          'CommandPanelPersist\bin\Release\CommandPanelPersist\latest.zip'
+        )
+        $zip = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if (-not $zip) { throw "latest.zip not found in build output." }
+        Copy-Item $zip CommandPanelPersist.zip -Force
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.ver.outputs.tag }}
+        name: ${{ steps.ver.outputs.tag }}
+        files: CommandPanelPersist.zip
+
+    - name: Update repo.json
+      shell: pwsh
+      run: |
+        $version = '${{ steps.ver.outputs.version }}'
+        $tag     = '${{ steps.ver.outputs.tag }}'
+        $url     = "https://github.com/${{ github.repository }}/releases/download/$tag/CommandPanelPersist.zip"
+        $now     = [int64](Get-Date -UFormat %s)
+
+        $manifest = Get-Content repo.json -Raw | ConvertFrom-Json
+        foreach ($p in $manifest) {
+          $p.AssemblyVersion       = $version
+          $p.TestingAssemblyVersion = $version
+          $p.DownloadLinkInstall   = $url
+          $p.DownloadLinkUpdate    = $url
+          $p.DownloadLinkTesting   = $url
+          $p.LastUpdate            = $now
+        }
+        $manifest | ConvertTo-Json -Depth 10 | Set-Content repo.json -Encoding UTF8
+
+    - name: Commit repo.json
+      shell: pwsh
+      run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add repo.json
+        if ((git diff --staged --quiet; $LASTEXITCODE) -ne 0) {
+          git commit -m "Release ${{ steps.ver.outputs.tag }}"
+          git push origin HEAD:master
+        }
