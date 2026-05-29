@@ -91,10 +91,11 @@ jobs:
     - name: Commit repo.json
       shell: pwsh
       run: |
-        git config user.name  "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config user.name  "Forgotten-Link"
+        git config user.email "33471981+Forgotten-Link@users.noreply.github.com"
         git add repo.json
-        if ((git diff --staged --quiet; $LASTEXITCODE) -ne 0) {
+        git diff --staged --quiet
+        if ($LASTEXITCODE -ne 0) {
           git commit -m "Release ${{ steps.ver.outputs.tag }}"
           git push origin HEAD:master
         }

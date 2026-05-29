@@ -3,8 +3,8 @@
     "Author": "kerhs",
     "Name": "CommandPanelPersist",
     "InternalName": "CommandPanelPersist",
-    "AssemblyVersion": "0.0.0.0",
-    "TestingAssemblyVersion": "0.0.0.0",
+    "AssemblyVersion": "0.1.0.0",
+    "TestingAssemblyVersion": "0.1.0.0",
     "Description": "Keeps the in-game Command Panel open through deaths, instance resets, and area transitions. Toggle with /cmdpanelpersist [on|off].",
     "Punchline": "Stops the Command Panel from closing on death, wipes, and zone changes.",
     "ApplicableVersion": "any",
@@ -13,7 +13,7 @@
     "DownloadLinkInstall": "https://github.com/Forgotten-Link/CommandPanelPersist/releases/latest/download/CommandPanelPersist.zip",
     "DownloadLinkUpdate": "https://github.com/Forgotten-Link/CommandPanelPersist/releases/latest/download/CommandPanelPersist.zip",
     "DownloadLinkTesting": "https://github.com/Forgotten-Link/CommandPanelPersist/releases/latest/download/CommandPanelPersist.zip",
-    "IconUrl": "",
+    "IconUrl": "https://raw.githubusercontent.com/Forgotten-Link/CommandPanelPersist/master/images/icon.png",
     "Tags": [
       "ui",
       "command panel",
@@ -21,6 +21,6 @@
       "qol"
     ],
     "AcceptsFeedback": true,
-    "LastUpdate": 0
+    "LastUpdate": 1780054326
   }
 ]
